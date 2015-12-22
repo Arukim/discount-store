@@ -11,3 +11,7 @@ type Euro float64
 func (euro Euro) String() string {
 	return fmt.Sprintf("%.2f€", euro)
 }
+
+func (cent euroCent) Euro() Euro {
+	return (Euro)(cent) / 100
+}

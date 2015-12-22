@@ -2,7 +2,7 @@ package store
 
 import "testing"
 
-func TestSimpleCheckout(t *testing.T) {
+func TestFirstCheckout(t *testing.T) {
 	totalExpected := Euro(32.50)
 	checkout := NewCheckout()
 
