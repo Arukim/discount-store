@@ -6,10 +6,11 @@ type Discounter interface {
 
 type discounterA struct {
 	itemCode string
+	count    int
 }
 
-func NewDiscounterA(code string) *discounterA {
-	d := discounterA{itemCode: code}
+func NewDiscounterA(code string, count int) *discounterA {
+	d := discounterA{itemCode: code, count: count}
 	return &d
 }
 
@@ -21,7 +22,7 @@ func (d discounterA) Discount(c *checkout) chan bool {
 			it := &c.cart[i]
 			if it.code == d.itemCode {
 				counter++
-				if counter%2 == 0 {
+				if counter%d.count == 0 {
 					it.price = 0
 				}
 			}
@@ -32,11 +33,13 @@ func (d discounterA) Discount(c *checkout) chan bool {
 }
 
 type discounterB struct {
-	itemCode string
+	itemCode      string
+	minCount      int
+	discountPrice euroCent
 }
 
-func NewDiscounterB(code string) *discounterB {
-	d := discounterB{itemCode: code}
+func NewDiscounterB(code string, minCount int, discountPrice euroCent) *discounterB {
+	d := discounterB{itemCode: code, minCount: minCount, discountPrice: discountPrice}
 	return &d
 }
 
@@ -50,10 +53,10 @@ func (d discounterB) Discount(c *checkout) chan bool {
 			}
 		}
 
-		if counter >= 3 {
+		if counter >= d.minCount {
 			for i, it := range c.cart {
 				if it.code == d.itemCode {
-					c.cart[i].price = euroCent(1900)
+					c.cart[i].price = d.discountPrice
 				}
 			}
 		}

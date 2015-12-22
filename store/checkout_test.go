@@ -7,7 +7,9 @@ type checkoutPair struct {
 	total Euro
 }
 
-var pricingRules = []Discounter{NewDiscounterA("VOUCHER"), NewDiscounterB("TSHIRT")}
+var pricingRules = []Discounter{
+	NewDiscounterA("VOUCHER", 2),
+	NewDiscounterB("TSHIRT", 3, euroCent(1900))}
 
 var tests = []checkoutPair{
 	{[]string{"VOUCHER", "TSHIRT", "MUG"}, Euro(32.50)},
