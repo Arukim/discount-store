@@ -7,6 +7,8 @@ type checkoutPair struct {
 	total Euro
 }
 
+var pricingRules = []Discounter{NewDiscounterA("VOUCHER"), NewDiscounterB("TSHIRT")}
+
 var tests = []checkoutPair{
 	{[]string{"VOUCHER", "TSHIRT", "MUG"}, Euro(32.50)},
 	{[]string{"VOUCHER", "TSHIRT", "VOUCHER"}, Euro(25.00)},
@@ -16,7 +18,7 @@ var tests = []checkoutPair{
 
 func TestAllBaseCheckouts(t *testing.T) {
 	for i, testCase := range tests {
-		checkout := NewCheckout()
+		checkout := NewCheckout(pricingRules)
 
 		for _, it := range testCase.cart {
 			checkout.Scan(it)
@@ -30,12 +32,9 @@ func TestAllBaseCheckouts(t *testing.T) {
 	}
 }
 
-func TestSecondCheckout(t *testing.T) {
-}
-
 func TestEmptyCart(t *testing.T) {
 	totalExpected := Euro(0)
-	checkout := NewCheckout()
+	checkout := NewCheckout(pricingRules)
 	total := checkout.GetTotal()
 	if total != totalExpected {
 		t.Errorf("Expected %v, go %v", totalExpected, total)
@@ -43,7 +42,7 @@ func TestEmptyCart(t *testing.T) {
 }
 
 func TestUnknownProduct(t *testing.T) {
-	checkout := NewCheckout()
+	checkout := NewCheckout(pricingRules)
 	err := checkout.Scan("IPhone9.5")
 	if err == nil {
 		t.Error("Currently no mobile phones are sold")
