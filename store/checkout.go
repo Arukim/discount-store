@@ -1,5 +1,7 @@
 package store
 
+import "errors"
+
 type checkout struct {
 	products map[string]product
 	cart     []string
@@ -21,8 +23,12 @@ func NewCheckout() *checkout {
 	return c
 }
 
-func (c *checkout) Scan(item string) {
-	c.cart = append(c.cart, item)
+func (c *checkout) Scan(item string) error {
+	if _, ok := c.products[item]; ok {
+		c.cart = append(c.cart, item)
+		return nil
+	}
+	return errors.New("no such item in store")
 }
 
 func (c *checkout) GetTotal() Euro {
