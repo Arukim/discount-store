@@ -1,3 +1,6 @@
+// Usage - create NewCheckout, add some items with Scan, GetTotal in the end
+// You can't add items after checkout is finished
+// You can add custom disconters, see discount.go
 package store
 
 import (
@@ -8,6 +11,8 @@ type checkout struct {
 	catalog     map[string]product
 	cart        []product
 	discounters []Discounter
+	isClosed    bool
+	total       euroCent
 }
 
 type product struct {
@@ -16,6 +21,7 @@ type product struct {
 	price euroCent
 }
 
+// get new Checkout instance
 func NewCheckout(d []Discounter) *checkout {
 	c := new(checkout)
 	c.catalog = map[string]product{
@@ -28,7 +34,13 @@ func NewCheckout(d []Discounter) *checkout {
 	return c
 }
 
+// Add item to checkout
 func (c *checkout) Scan(item string) error {
+	// Can't add items to already closed checkout
+	if c.isClosed {
+		return errors.New("checkout is already closed")
+	}
+	// if item is on catalog - push it into cart
 	if it, ok := c.catalog[item]; ok {
 		c.cart = append(c.cart, product{code: it.code, price: it.price})
 		return nil
@@ -36,17 +48,25 @@ func (c *checkout) Scan(item string) error {
 	return errors.New("no such item in store")
 }
 
+// count total
 func (c *checkout) GetTotal() Euro {
-	total := euroCent(0)
+	// if total is already counted - return counted value
+	if c.isClosed {
+		return c.total.Euro()
+	}
 
+	// run all discounters
 	for _, disc := range c.discounters {
 		b := disc.Discount(c)
 		<-b
 	}
 
+	// get cart sum
 	for _, it := range c.cart {
-		total += it.price
+		c.total += it.price
 	}
 
-	return total.Euro()
+	// set closed flag
+	c.isClosed = true
+	return c.total.Euro()
 }
